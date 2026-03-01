@@ -1,0 +1,15 @@
+# Environments
+.env
+.venv/
+env/
+
+# Databases
+qdrant_db/
+
+# Python artifacts
+__pycache__/
+*.pyc
+
+# Data
+data/*
+!data/.gitkeep
