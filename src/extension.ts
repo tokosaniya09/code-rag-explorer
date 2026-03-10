@@ -1,11 +1,23 @@
 import * as vscode from 'vscode';
 import { JavaParser } from './ingestion/parser';
 import { CodeVectorStore } from './indexer/vectorStore';
+import { SidebarProvider } from './ui/SidebarProvider'; // 1. Import the new provider
 
 export async function activate(context: vscode.ExtensionContext) {
+    // 2. Initialize our core logic engines
     const parser = new JavaParser();
     const store = new CodeVectorStore();
     await parser.initialize();
+
+    // 3. Setup the Sidebar UI
+    const sidebarProvider = new SidebarProvider(context.extensionUri, store);
+    
+    // 4. Register the Sidebar Provider
+    // The ID "code-rag-explorer-sidebar" MUST match the ID in your package.json
+    const sidebarRegistration = vscode.window.registerWebviewViewProvider(
+        "code-rag-explorer-sidebar",
+        sidebarProvider
+    );
 
     // Command: Indexing
     let indexCmd = vscode.commands.registerCommand('code-rag-explorer.indexWorkspace', async () => {
@@ -24,15 +36,21 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.window.showInformationMessage("Code indexed!");
     });
 
-    // Command: Search
+    // Command: Search (Standard Input Box version)
     let searchCmd = vscode.commands.registerCommand('code-rag-explorer.search', async () => {
         const query = await vscode.window.showInputBox({ prompt: "What are you looking for?" });
         if (query) {
             const results = await store.search(query);
-            // In the next step, we will build the UI to show these results
             console.log(results);
         }
     });
 
-    context.subscriptions.push(indexCmd, searchCmd);
+    // 5. Push everything into context.subscriptions so VS Code can clean up when deactivated
+    context.subscriptions.push(
+        sidebarRegistration, 
+        indexCmd, 
+        searchCmd
+    );
 }
+
+export function deactivate() {}
