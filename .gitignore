@@ -1,0 +1,39 @@
+# Dependency Directories
+node_modules/
+jspm_packages/
+
+# Build Outputs
+out/
+dist/
+build/
+*.tsbuildinfo
+
+# Secret API Keys (CRITICAL)
+.env
+.env.local
+.env.*.local
+
+# Local Vector Database (ChromaDB)
+data/chroma_db/
+.chroma/
+
+# Tree-sitter Binaries and Artifacts
+# We usually keep the .wasm in /parsers, but ignore other build artifacts
+*.gyp
+*.node
+
+# VS Code Specifics
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.json
+*.code-workspace
+
+# Logs and System Files
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+Thumbs.db

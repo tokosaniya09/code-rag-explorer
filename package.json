@@ -1,0 +1,43 @@
+{
+  "name": "code-rag-explorer",
+  "displayName": "Code RAG Explorer",
+  "description": "AST-aware semantic code search for Java/Maven",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "code-rag-explorer.indexWorkspace",
+        "title": "RAG: Index Current Workspace"
+      },
+      {
+        "command": "code-rag-explorer.search",
+        "title": "RAG: Advanced Search"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "dependencies": {
+    "@huggingface/inference": "^2.8.1",
+    "chromadb": "^3.3.2",
+    "dotenv": "^16.6.1",
+    "fast-xml-parser": "^4.5.4",
+    "web-tree-sitter": "^0.20.8"
+  },
+  "devDependencies": {
+    "@types/node": "^18.19.130",
+    "@types/vscode": "^1.110.0",
+    "typescript": "^5.9.3"
+  }
+}
