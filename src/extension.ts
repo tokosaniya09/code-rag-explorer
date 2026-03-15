@@ -1,42 +1,47 @@
+import * as path from 'path';
+import * as dotenv from 'dotenv';
 import * as vscode from 'vscode';
 import { JavaParser } from './ingestion/parser';
 import { CodeVectorStore } from './indexer/vectorStore';
-import { SidebarProvider } from './ui/SidebarProvider'; // 1. Import the new provider
+import { SidebarProvider } from './ui/SidebarProvider'; 
 
 export async function activate(context: vscode.ExtensionContext) {
-    // 2. Initialize our core logic engines
+    dotenv.config({ path: path.join(context.extensionPath, '.env') });
+    console.log(">>> Token loaded successfully. Length:", process.env.HF_TOKEN?.length);
+
     const parser = new JavaParser();
     const store = new CodeVectorStore();
     await parser.initialize();
 
-    // 3. Setup the Sidebar UI
     const sidebarProvider = new SidebarProvider(context.extensionUri, store);
     
-    // 4. Register the Sidebar Provider
-    // The ID "code-rag-explorer-sidebar" MUST match the ID in your package.json
     const sidebarRegistration = vscode.window.registerWebviewViewProvider(
         "code-rag-explorer-sidebar",
         sidebarProvider
     );
 
-    // Command: Indexing
     let indexCmd = vscode.commands.registerCommand('code-rag-explorer.indexWorkspace', async () => {
+        console.log(">>> Indexing command triggered"); 
         const editor = vscode.window.activeTextEditor;
-        if (!editor) return;
+        if (!editor) {
+            console.error(">>> No active editor found!"); 
+            return;
+        }
 
-        const code = editor.document.getText();
-        const chunks = parser.parseCode(code, editor.document.fileName);
-        
-        await vscode.window.withProgress({
-            location: vscode.ProgressLocation.Notification,
-            title: "Indexing Code...",
-        }, async () => {
+        try {
+            const code = editor.document.getText();
+            console.log(">>> Code length:", code.length); 
+            const chunks = parser.parseCode(code, editor.document.fileName);
+            console.log(">>> Chunks created:", chunks.length); 
+            
             await store.addCodeChunks(chunks);
-        });
-        vscode.window.showInformationMessage("Code indexed!");
+            vscode.window.showInformationMessage("Code indexed!");
+        } catch (err) {
+            console.error(">>> INDEXING FAILED:", err); 
+            vscode.window.showErrorMessage("Indexing failed: " + err);
+        }
     });
 
-    // Command: Search (Standard Input Box version)
     let searchCmd = vscode.commands.registerCommand('code-rag-explorer.search', async () => {
         const query = await vscode.window.showInputBox({ prompt: "What are you looking for?" });
         if (query) {
@@ -45,7 +50,6 @@ export async function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    // 5. Push everything into context.subscriptions so VS Code can clean up when deactivated
     context.subscriptions.push(
         sidebarRegistration, 
         indexCmd, 

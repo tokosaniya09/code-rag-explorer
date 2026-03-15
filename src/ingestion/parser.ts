@@ -1,4 +1,4 @@
-import * as Parser from 'web-tree-sitter';
+import Parser from 'web-tree-sitter';
 import * as path from 'path';
 
 export class JavaParser {
@@ -7,19 +7,15 @@ export class JavaParser {
     async initialize() {
         await Parser.init();
         this.parser = new Parser();
-        // You'll need to download the tree-sitter-java.wasm file
         const Lang = await Parser.Language.load(path.join(__dirname, '../../parsers/tree-sitter-java.wasm'));
         this.parser.setLanguage(Lang);
+        console.log("Looking for parser at:", path.join(__dirname, '../../parsers/tree-sitter-java.wasm'));
     }
 
-    /**
-     * Extracts methods and classes as logical units (CAST strategy)[cite: 31, 32].
-     */
     parseCode(code: string, filePath: string) {
         const tree = this.parser.parse(code);
         const chunks: any[] = [];
 
-        // Query to find method declarations [cite: 14]
         const query = this.parser.getLanguage().query(`
             (method_declaration
                 name: (identifier) @name

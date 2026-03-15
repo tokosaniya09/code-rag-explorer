@@ -25,10 +25,9 @@ export class CodeVectorStore {
     }
 
     async search(query: string, limit: number = 3) {
-        const collection = await this.client.getCollection({ name: this.collectionName });
+        const collection = await this.client.getOrCreateCollection({ name: this.collectionName });
         const queryEmbedding = await this.embedder.getEmbeddings(query);
 
-        // HNSW algorithm ensures fast search even in large codebases
         return await collection.query({
             queryEmbeddings: [queryEmbedding],
             nResults: limit

@@ -18,12 +18,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
-    // Handle messages from the Webview (User actions)
     webviewView.webview.onDidReceiveMessage(async (data) => {
       switch (data.type) {
         case "onSearch": {
           const results = await this.store.search(data.value);
-          // Send results back to UI
           webviewView.webview.postMessage({ type: "search-results", results });
           break;
         }
@@ -32,7 +30,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           const doc = await vscode.workspace.openTextDocument(openPath);
           const editor = await vscode.window.showTextDocument(doc);
           
-          // Jump to the specific line
           const range = new vscode.Range(data.line - 1, 0, data.line - 1, 0);
           editor.selection = new vscode.Selection(range.start, range.end);
           editor.revealRange(range, vscode.TextEditorRevealType.InCenter);
@@ -42,11 +39,9 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             const results = await this.store.search(data.value);
             const contextText = results.documents[0].join("\n---\n");
             
-            // Call our new generator
             const generator = new ChatGenerator();
             const answer = await generator.generateAnswer(data.value, contextText);
             
-            // Send the AI's explanation back to the sidebar
             webviewView.webview.postMessage({ type: "ai-response", answer });
             break;
         }}

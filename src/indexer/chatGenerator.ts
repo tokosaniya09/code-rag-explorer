@@ -1,15 +1,13 @@
-import { HfInference } from '@huggingface/inference';
 import * as dotenv from 'dotenv';
-
 dotenv.config();
+
+import { HfInference } from '@huggingface/inference';
 
 export class ChatGenerator {
     private hf = new HfInference(process.env.HF_TOKEN);
-    // Using a generative model to synthesize answers [cite: 52]
     private model = "meta-llama/Meta-Llama-3-8B-Instruct"; 
 
     async generateAnswer(query: string, codeContext: string) {
-        // We use a professional prompt template for technical accuracy [cite: 148, 151]
         const prompt = `
         System: You are an expert Java Architect. Answer based ONLY on the provided code.
         Context: ${codeContext}

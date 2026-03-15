@@ -1,12 +1,17 @@
-import { HfInference } from '@huggingface/inference';
 import * as dotenv from 'dotenv';
-
 dotenv.config();
 
+import { HfInference } from '@huggingface/inference';
+
+console.log(">>> Checking Token Length:", process.env.HF_TOKEN?.length);
+
 export class CloudEmbedder {
-    private hf = new HfInference(process.env.HF_TOKEN);
-    // UniXcoder is excellent for mapping natural language to logic
-    private model = "microsoft/unixcoder-base"; 
+    private hf: HfInference;
+    private model = "sentence-transformers/all-MiniLM-L6-v2";
+
+    constructor() {
+        this.hf = new HfInference(process.env.HF_TOKEN);
+    }
 
     async getEmbeddings(text: string): Promise<number[]> {
         try {
@@ -14,10 +19,9 @@ export class CloudEmbedder {
                 model: this.model,
                 inputs: text,
             });
-            // The API returns a multi-dimensional array; we flatten it for Chroma
             return (output as number[][]).flat();
         } catch (error) {
-            console.error("Hugging Face API Error:", error);
+            console.error("Hugging Face Detailed Error:", JSON.stringify(error));
             throw error;
         }
     }
